@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::ops::DerefMut;
+use std::ops::Index;
+use std::ops::IndexMut;
 
 pub struct TrieMap<K, V> (HashMap<Key, Val<K, V>>);
 
@@ -80,6 +82,20 @@ impl<K, V> TrieMap<K, V> {
 impl<K, V> Default for TrieMap<K, V> {
 	fn default() -> Self {
 		TrieMap (HashMap::default())
+	}
+}
+
+impl<T: AsRef<[Key]> + ?Sized, K: Borrow<T>, V> Index<&T> for TrieMap<K, V> {
+	type Output = V;
+
+	fn index(&self, key: &T) -> &Self::Output {
+		self.get(key).unwrap()
+	}
+}
+
+impl<T: AsRef<[Key]> + ?Sized, K: Borrow<T>, V> IndexMut<&T> for TrieMap<K, V> {
+	fn index_mut(&mut self, key: &T) -> &mut Self::Output {
+		self.get_mut(key).unwrap()
 	}
 }
 
