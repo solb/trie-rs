@@ -36,6 +36,11 @@ impl<A: Clone + Eq + Hash, T: AsRef<[A]> + Clone> TrieSet<T, A> {
 		let TrieSet (this) = self;
 		this.iter_prefix(prefix)
 	}
+
+	pub fn len(&self) -> usize {
+		let TrieSet (this) = self;
+		this.len()
+	}
 }
 
 impl<T, A: Clone + Eq + Hash> Default for TrieSet<T, A> {

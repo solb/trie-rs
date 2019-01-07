@@ -10,6 +10,7 @@ pub struct TrieMap<K, V, A = u8> {
 	_key: PhantomData<K>,
 	val: Option<V>,
 	subtrie: HashMap<A, TrieMap<K, V, A>>,
+	len: usize,
 }
 
 impl<K, V, A: Clone + Eq + Hash> TrieMap<K, V, A> {
@@ -60,6 +61,10 @@ impl<K, V, A: Clone + Eq + Hash> TrieMap<K, V, A> {
 		self.iter_mut_helper(prefix.as_ref())
 	}
 
+	pub fn len(&self) -> usize {
+		self.len
+	}
+
 	fn get_helper(&self, key: &[A]) -> Option<&V> {
 		if let Some(atom) = key.first() {
 			self.subtrie.get(atom)?.get_helper(&key[1..])
@@ -77,11 +82,17 @@ impl<K, V, A: Clone + Eq + Hash> TrieMap<K, V, A> {
 	}
 
 	fn insert_helper(&mut self, key: &[A], val: V) -> Option<V> {
-		if let Some(atom) = key.first().cloned() {
+		let existing = if let Some(atom) = key.first().cloned() {
 			self.subtrie.entry(atom).or_default().insert_helper(&key[1..], val)
 		} else {
 			self.val.replace(val)
+		};
+
+		if existing.is_none() {
+			self.len += 1;
 		}
+
+		existing
 	}
 
 	fn iter_helper(&self, key: &[A]) -> Iter<&V> {
@@ -123,6 +134,7 @@ impl<K, V, A: Clone + Eq + Hash> Default for TrieMap<K, V, A> {
 			_key: PhantomData::default(),
 			val: None,
 			subtrie: HashMap::default(),
+			len: 0,
 		}
 	}
 }
