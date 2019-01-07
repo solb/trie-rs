@@ -21,6 +21,7 @@ impl<K, V, A: Clone + Eq + Hash> TrieMap<K, V, A> {
 	pub fn clear(&mut self) {
 		self.val.take();
 		self.subtrie.clear();
+		self.len = 0;
 	}
 
 	pub fn contains<T: AsRef<[A]> + ?Sized>(&self, key: &T) -> bool
