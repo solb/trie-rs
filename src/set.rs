@@ -26,6 +26,11 @@ impl<A: Clone + Eq + Hash, T: AsRef<[A]> + Clone> TrieSet<T, A> {
 		this.insert(&elem.clone(), elem).is_none()
 	}
 
+	pub fn is_empty(&self) -> bool {
+		let TrieSet (this) = self;
+		this.is_empty()
+	}
+
 	pub fn iter(&self) -> Iter<&T> {
 		let TrieSet (this) = self;
 		this.iter()

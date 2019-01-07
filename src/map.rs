@@ -43,6 +43,10 @@ impl<K, V, A: Clone + Eq + Hash> TrieMap<K, V, A> {
 		self.insert_helper(key.as_ref(), val)
 	}
 
+	pub fn is_empty(&self) -> bool {
+		self.len == 0
+	}
+
 	pub fn iter(&self) -> Iter<&V> {
 		self.iter_helper(&[])
 	}
