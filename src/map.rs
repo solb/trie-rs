@@ -1,6 +1,7 @@
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::hash::Hash;
+use std::iter::FusedIterator;
 use std::marker::PhantomData;
 use std::ops::Index;
 use std::ops::IndexMut;
@@ -140,4 +141,4 @@ impl<A: Clone + Eq + Hash, T: AsRef<[A]> + ?Sized, K: Borrow<T>, V> IndexMut<&T>
 	}
 }
 
-pub type Iter<'a, T> = Box<dyn Iterator<Item = T> + 'a>;
+pub type Iter<'a, T> = Box<dyn FusedIterator<Item = T> + 'a>;
