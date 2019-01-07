@@ -38,6 +38,24 @@ impl<K, V> TrieMap<K, V> {
 		self.get_mut_helper(key.as_ref())
 	}
 
+	pub fn iter(&self) -> Iter<&V> {
+		self.iter_helper(&[])
+	}
+
+	pub fn iter_mut(&mut self) -> Iter<&mut V> {
+		self.iter_mut_helper(&[])
+	}
+
+	pub fn iter_prefix<T: AsRef<[Key]> + ?Sized>(&self, prefix: &T) -> Iter<&V>
+	where K: Borrow<T> {
+		self.iter_helper(prefix.as_ref())
+	}
+
+	pub fn iter_prefix_mut<T: AsRef<[Key]> + ?Sized>(&mut self, prefix: &T) -> Iter<&mut V>
+	where K: Borrow<T> {
+		self.iter_mut_helper(prefix.as_ref())
+	}
+
 	fn insert_helper(&mut self, key: &[Key], val: V) -> Option<V> {
 		use std::collections::hash_map::Entry;
 		use std::mem::replace;
@@ -59,6 +77,52 @@ impl<K, V> TrieMap<K, V> {
 				}
 				None
 			},
+		}
+	}
+
+	fn iter_helper(&self, key: &[Key]) -> Iter<&V> {
+		use std::iter::empty;
+		use std::iter::once;
+
+		let TrieMap (this) = self;
+		if key.len() == 0 {
+			Box::new(this.iter().flat_map(|(_, entry)| match entry {
+				Val::Leaf(val) => Box::new(once(&**val)),
+				Val::Branch(subtrie) => subtrie.iter_helper(&[]),
+			}))
+		} else {
+			match this.get(&key[0]) {
+				Some(Val::Leaf(val)) => if key.len() == 0 {
+					Box::new(once(&**val))
+				} else {
+					Box::new(empty())
+				},
+				Some(Val::Branch(subtrie)) => subtrie.iter_helper(&key[1..]),
+				None => Box::new(empty()),
+			}
+		}
+	}
+
+	fn iter_mut_helper(&mut self, key: &[Key]) -> Iter<&mut V> {
+		use std::iter::empty;
+		use std::iter::once;
+
+		let TrieMap (this) = self;
+		if key.len() == 0 {
+			Box::new(this.iter_mut().flat_map(|(_, entry)| match entry {
+				Val::Leaf(val) => Box::new(once(&mut **val)),
+				Val::Branch(subtrie) => subtrie.iter_mut_helper(&[]),
+			}))
+		} else {
+			match this.get_mut(&key[0]) {
+				Some(Val::Leaf(val)) => if key.len() == 0 {
+					Box::new(once(&mut **val))
+				} else {
+					Box::new(empty())
+				},
+				Some(Val::Branch(subtrie)) => subtrie.iter_mut_helper(&key[1..]),
+				None => Box::new(empty()),
+			}
 		}
 	}
 
@@ -98,6 +162,8 @@ impl<T: AsRef<[Key]> + ?Sized, K: Borrow<T>, V> IndexMut<&T> for TrieMap<K, V> {
 		self.get_mut(key).unwrap()
 	}
 }
+
+pub type Iter<'a, T> = Box<dyn Iterator<Item = T> + 'a>;
 
 type Key = u8;
 
