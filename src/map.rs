@@ -165,7 +165,7 @@ impl<T: AsRef<[Key]> + ?Sized, K: Borrow<T>, V> IndexMut<&T> for TrieMap<K, V> {
 
 pub type Iter<'a, T> = Box<dyn Iterator<Item = T> + 'a>;
 
-type Key = u8;
+pub type Key = u8;
 
 enum Val<K, V> {
 	Leaf(Leaf<K, V>),
