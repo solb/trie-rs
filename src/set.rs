@@ -1,11 +1,11 @@
 use crate::map::Iter;
-use crate::map::Key;
 use crate::map::TrieMap;
 use std::borrow::Borrow;
+use std::hash::Hash;
 
-pub struct TrieSet<T> (TrieMap<T, T>);
+pub struct TrieSet<T, A = u8> (TrieMap<T, T, A>);
 
-impl<T: AsRef<[Atom]> + Clone> TrieSet<T> {
+impl<A: Clone + Eq + Hash, T: AsRef<[A]> + Clone> TrieSet<T, A> {
 	pub fn new() -> Self {
 		Self::default()
 	}
@@ -15,7 +15,7 @@ impl<T: AsRef<[Atom]> + Clone> TrieSet<T> {
 		this.clear();
 	}
 
-	pub fn contains<S: AsRef<[Atom]> + ?Sized>(&self, elem: &S) -> bool
+	pub fn contains<S: AsRef<[A]> + ?Sized>(&self, elem: &S) -> bool
 	where T: Borrow<S> {
 		let TrieSet (this) = self;
 		this.contains(elem)
@@ -31,17 +31,15 @@ impl<T: AsRef<[Atom]> + Clone> TrieSet<T> {
 		this.iter()
 	}
 
-	pub fn iter_prefix<S: AsRef<[Atom]> + ?Sized>(&self, prefix: &S) -> Iter<&T>
+	pub fn iter_prefix<S: AsRef<[A]> + ?Sized>(&self, prefix: &S) -> Iter<&T>
 	where T: Borrow<S> {
 		let TrieSet (this) = self;
 		this.iter_prefix(prefix)
 	}
 }
 
-impl<T> Default for TrieSet<T> {
+impl<T, A: Clone + Eq + Hash> Default for TrieSet<T, A> {
 	fn default() -> Self {
 		TrieSet (TrieMap::default())
 	}
 }
-
-pub type Atom = Key;
